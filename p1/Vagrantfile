@@ -1,0 +1,62 @@
+BOX = "ubuntu/jammy64"
+BOX_URL = ""
+
+MEMORY = 2048
+CPUS = 2
+
+NETWORK = "private_network"
+
+CONTROL = "acharS"
+CONTROL_IP = "192.168.56.110"
+
+AGENT = "acharSW"
+AGENT_IP = "192.168.56.111"
+
+
+Vagrant.configure("2") do |config|
+
+	config.vm.box = BOX
+	#config.vm.box_url = BOX_URL
+
+	config.vm.synced_folder "./shared", "/vagrant"
+
+	#Common config
+	config.vm.provider "virtualbox" do |v|
+		v.memory = MEMORY
+		v.cpus = CPUS
+		v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+		v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+
+	end
+
+	#Controller VM
+	config.vm.define CONTROL do |control|
+		control.vm.hostname = CONTROL
+		control.vm.network NETWORK, ip: CONTROL_IP
+
+		#provision script, install k3s in controller mode and store the token in the shared folder (! not very secure i guess but should do for now !)
+		control.vm.provision "shell", inline: <<-SHELL
+			echo -n "#{CONTROL_IP} #{CONTROL}\n#{AGENT_IP} #{AGENT}" >> /etc/hosts
+			curl -sfL https://get.k3s.io | sh -s - server \
+			--write-kubeconfig-mode=644 \
+			--node-ip=#{CONTROL_IP}
+			cp /var/lib/rancher/k3s/server/node-token /vagrant/token
+		SHELL
+	end
+
+	#Agent VM
+	config.vm.define "acharSW" do |agent|
+		agent.vm.hostname = AGENT
+		agent.vm.network NETWORK, ip: AGENT_IP
+
+		#provision script, install k3s and set it up in agent mode with the token from the shared folder
+		agent.vm.provision "shell", inline: <<-SHELL
+			echo -n "#{CONTROL_IP} #{CONTROL}\n#{AGENT_IP} #{AGENT}" >> /etc/hosts
+			curl -sfL https://get.k3s.io | sh -s - agent \
+			--server=https://#{CONTROL_IP}:6443 \
+			--token-file=/vagrant/token \
+			--node-ip=#{AGENT_IP}
+		SHELL
+	end
+end
+

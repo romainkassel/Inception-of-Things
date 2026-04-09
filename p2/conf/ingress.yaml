@@ -1,0 +1,45 @@
+#ingress rules, still need ingress controller installed manually,
+#need to check if gateway are better
+#
+apiVersion: networking.k8s.io/v1
+
+kind: Ingress
+
+metadata:
+  name: test-ingress
+
+spec:
+#default k3s ingress controller
+  ingressClassName: traefik
+  rules:
+    - host: app1.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-one
+                port:
+                  number: 80
+    - host: app2.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-two
+                port:
+                  number: 80
+#app three is the default when no host
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-three
+                port:
+                  number: 80
+#make sure the services are ready for port 80 !

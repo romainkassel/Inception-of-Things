@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-one
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+        - name: app-one
+          image: hashicorp/http-echo
+          args:
+            - "-text=hello from app1"
+          resources:
+            requests:
+              memory:
+              cpu:
+            limits:
+              memory:
+              cpu:
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-one
+spec:
+  selector:
+    app: app1
+  ports:
+    - port: 80
+      targetPort: 5678
+#http echo default listening port

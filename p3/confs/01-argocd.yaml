@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-simple
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/romainkassel/iot-app-rkassel'
+    targetRevision: HEAD
+    path: 'confs' # Folder that contains conf files related to app (deployment + service)
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev # Namespace related to app
+  syncPolicy:
+    automated: {} # Enables automated sync

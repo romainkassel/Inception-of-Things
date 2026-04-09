@@ -1,0 +1,16 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+
+  config.vm.provider "virtualbox" do |q|
+    q.memory = 10240
+    q.cpus = 4
+  end
+
+  config.vm.synced_folder "./confs", "/vagrant/confs", type: "rsync"
+
+  config.vm.network "forwarded_port", guest: 8443, host: 8443 # ArgoCD
+  config.vm.network "forwarded_port", guest: 8888, host: 8888 # App + Gitlab
+
+  config.vm.provision "shell", path: "./scripts/setup.sh"
+
+end
