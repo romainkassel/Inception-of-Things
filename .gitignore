@@ -1,0 +1,12 @@
+# Ignore all Vagrant folders recursively (local and temporary files)
+.vagrant/
+
+# Vagrant should not be used in Part 3 (P3)
+# But at home, on Mac, need to setup a VM first to simulate 42 school environement/VM
+p3/Vagrantfile
+
+# Script used to setup home VM
+p3/scripts/setup_vm.sh
+
+# .DS_Store
+.DS_Store
